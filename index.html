@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Einfluss der Temperatur auf die Enzymaktivität</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Biologie EF / 11. Klasse</p>
+          <h1>Experiment: Einfluss der Temperatur auf die Enzymaktivität</h1>
+        </div>
+        <p class="model-note">Modellhafte Simulation: Die dargestellten Werte und Formen sind didaktisch vereinfacht.</p>
+      </header>
+
+      <section class="dashboard-grid" aria-label="Unterrichtssimulation">
+        <article class="module simulation-card">
+          <div class="module-header">
+            <div>
+              <h2>Simulation</h2>
+              <p id="runStatus">Bereit für einen Durchlauf.</p>
+            </div>
+            <div class="controls" aria-label="Simulationssteuerung">
+              <button id="startButton" type="button">Start</button>
+              <button id="pauseButton" type="button" disabled>Pause</button>
+              <button id="stopButton" type="button" disabled>Stopp</button>
+            </div>
+          </div>
+
+          <canvas id="simulationCanvas" width="900" height="520" aria-label="Animierte Enzymreaktion"></canvas>
+
+          <div class="stats" aria-live="polite">
+            <div>
+              <span>Temperatur</span>
+              <strong id="statTemperature">30 °C</strong>
+            </div>
+            <div>
+              <span>Umgesetzt</span>
+              <strong id="statConverted">0 / 10</strong>
+            </div>
+            <div>
+              <span>Aktive Enzyme</span>
+              <strong id="statActive">4</strong>
+            </div>
+            <div>
+              <span>Denaturiert</span>
+              <strong id="statDenatured">0</strong>
+            </div>
+            <div>
+              <span>Zeit</span>
+              <strong id="statTime">0,0 s</strong>
+            </div>
+            <div>
+              <span>v nach Abschluss</span>
+              <strong id="statVelocity">-</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="module chart-card">
+          <div class="module-header">
+            <div>
+              <h2>Diagramm</h2>
+              <p>Messpunkte abgeschlossener Durchläufe</p>
+            </div>
+            <button id="clearPointsButton" type="button" class="secondary">Messpunkte löschen</button>
+          </div>
+          <canvas id="chartCanvas" width="720" height="430" aria-label="Diagramm der Enzymaktivität"></canvas>
+        </article>
+
+        <article class="module legend-card">
+          <h2>Legende</h2>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-enzyme"><span></span></span>
+              <strong>Enzym</strong>
+            </div>
+            <div class="legend-item">
+              <span class="legend-substrate"></span>
+              <strong>Substrat</strong>
+            </div>
+            <div class="legend-item">
+              <span class="legend-products"><span></span><span></span></span>
+              <strong>Produkt</strong>
+            </div>
+            <div class="legend-item">
+              <span class="legend-denatured"><span></span></span>
+              <strong>denaturiertes Enzym</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="module thermometer-card">
+          <div class="module-header">
+            <div>
+              <h2>Thermometer</h2>
+              <p id="temperatureHint">Temperatur vor dem Start einstellen.</p>
+            </div>
+            <strong id="temperatureValue" class="temperature-value">30 °C</strong>
+          </div>
+
+          <div class="thermometer-panel">
+            <div class="thermometer" aria-hidden="true">
+              <div class="thermometer-scale">
+                <span>50</span><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span>
+              </div>
+              <div class="thermometer-tube">
+                <div id="thermometerFill" class="thermometer-fill"></div>
+              </div>
+              <div class="thermometer-bulb"></div>
+            </div>
+            <div class="slider-wrap">
+              <input id="temperatureSlider" type="range" min="0" max="50" value="30" step="10" aria-label="Temperatur in Grad Celsius">
+              <div class="slider-labels" aria-hidden="true">
+                <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="js/simulationParams.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

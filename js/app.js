@@ -16,6 +16,8 @@
   const temperatureValue = document.getElementById("temperatureValue");
   const temperatureHint = document.getElementById("temperatureHint");
   const thermometerFill = document.getElementById("thermometerFill");
+  const thermometerScale = document.getElementById("thermometerScale");
+  const sliderLabels = document.getElementById("sliderLabels");
   const runStatus = document.getElementById("runStatus");
 
   const statTemperature = document.getElementById("statTemperature");
@@ -24,6 +26,14 @@
   const statDenatured = document.getElementById("statDenatured");
   const statTime = document.getElementById("statTime");
   const statVelocity = document.getElementById("statVelocity");
+  const homeView = document.getElementById("homeView");
+  const temperatureSimulationView = document.getElementById("temperatureSimulationView");
+  const phLearningView = document.getElementById("phLearningView");
+  const openTemperatureSimulation = document.getElementById("openTemperatureSimulation");
+  const openPhLearning = document.getElementById("openPhLearning");
+  const backToHomeFromPh = document.getElementById("backToHomeFromPh");
+  const phLearningContent = document.getElementById("phLearningContent");
+  const phLearningIntro = document.getElementById("phLearningIntro");
 
   const colors = {
     enzyme: "#7bc6a6",
@@ -41,12 +51,16 @@
   const enzymeSize = { width: 118, height: 72 };
   const substrateSize = { width: 34, height: 18 };
   const productSize = 16;
+  const temperatureSteps = simConfig.temperatureSteps;
+  const minTemperature = Math.min(...temperatureSteps);
+  const maxTemperature = Math.max(...temperatureSteps);
 
-  let selectedTemperature = Number(temperatureSlider.value);
+  let selectedTemperature = getDefaultTemperature();
   let runState = createInitialState(selectedTemperature);
   let animationFrame = null;
   let lastFrameTime = null;
   let measuredPoints = [];
+  let phLearningData = null;
 
   function createInitialState(temperature) {
     const setting = tempSettings[temperature];
@@ -66,6 +80,50 @@
     state.enzymes = createEnzymes(state);
     state.substrates = createSubstrates(state);
     return state;
+  }
+
+  function getDefaultTemperature() {
+    return temperatureSteps.includes(simConfig.optimumTemperature)
+      ? simConfig.optimumTemperature
+      : temperatureSteps[0];
+  }
+
+  function getTemperatureIndex(temperature) {
+    const index = temperatureSteps.indexOf(temperature);
+    return index >= 0 ? index : 0;
+  }
+
+  function getSelectedSliderTemperature() {
+    const index = Number(temperatureSlider.value);
+    return temperatureSteps[index] ?? temperatureSteps[0];
+  }
+
+  function setupTemperatureControl() {
+    temperatureSlider.min = "0";
+    temperatureSlider.max = String(Math.max(0, temperatureSteps.length - 1));
+    temperatureSlider.step = "1";
+    temperatureSlider.value = String(getTemperatureIndex(selectedTemperature));
+
+    sliderLabels.innerHTML = "";
+    temperatureSteps.forEach((temperature) => {
+      const label = document.createElement("span");
+      label.textContent = String(temperature);
+      if (temperature === simConfig.optimumTemperature) label.className = "optimum-label";
+      sliderLabels.appendChild(label);
+    });
+
+    thermometerScale.innerHTML = "";
+    temperatureSteps
+      .slice()
+      .sort((a, b) => a - b)
+      .forEach((temperature) => {
+        const label = document.createElement("span");
+        const percentage = ((temperature - minTemperature) / (maxTemperature - minTemperature)) * 100;
+        label.textContent = String(temperature);
+        label.style.bottom = `${percentage}%`;
+        if (temperature === simConfig.optimumTemperature) label.className = "optimum-label";
+        thermometerScale.appendChild(label);
+      });
   }
 
   function getDenaturation(setting) {
@@ -386,7 +444,8 @@
   function updateTemperatureDisplay() {
     temperatureValue.textContent = `${selectedTemperature} °C`;
     statTemperature.textContent = `${selectedTemperature} °C`;
-    thermometerFill.style.height = `${Math.max(5, (selectedTemperature / 50) * 100)}%`;
+    const range = Math.max(1, maxTemperature - minTemperature);
+    thermometerFill.style.height = `${Math.max(5, ((selectedTemperature - minTemperature) / range) * 100)}%`;
   }
 
   function updateDisplays() {
@@ -505,7 +564,7 @@
     chartCtx.lineWidth = 1;
 
     simConfig.temperatureSteps.forEach((temperature) => {
-      const x = padding.left + (temperature / 50) * width;
+      const x = padding.left + ((temperature - minTemperature) / (maxTemperature - minTemperature)) * width;
       chartCtx.beginPath();
       chartCtx.moveTo(x, padding.top);
       chartCtx.lineTo(x, padding.top + height);
@@ -531,7 +590,7 @@
     chartCtx.font = "16px Segoe UI, Arial";
     chartCtx.textAlign = "center";
     simConfig.temperatureSteps.forEach((temperature) => {
-      const x = padding.left + (temperature / 50) * width;
+      const x = padding.left + ((temperature - minTemperature) / (maxTemperature - minTemperature)) * width;
       chartCtx.fillText(String(temperature), x, padding.top + height + 28);
     });
     chartCtx.textAlign = "right";
@@ -577,7 +636,10 @@
   }
 
   function mapChartPoint(point, padding, width, height) {
-    return { x: padding.left + (point.temperature / 50) * width, y: padding.top + height - (point.velocity / 100) * height };
+    return {
+      x: padding.left + ((point.temperature - minTemperature) / (maxTemperature - minTemperature)) * width,
+      y: padding.top + height - (point.velocity / 100) * height
+    };
   }
 
   function activeSiteTarget(enzyme) {
@@ -627,8 +689,789 @@
     return Math.min(max, Math.max(min, value));
   }
 
+  function showView(viewName) {
+    homeView.classList.toggle("view-hidden", viewName !== "home");
+    temperatureSimulationView.classList.toggle("view-hidden", viewName !== "temperature");
+    phLearningView.classList.toggle("view-hidden", viewName !== "ph");
+  }
+
+  async function openPhLearningArea() {
+    showView("ph");
+    phLearningContent.innerHTML = '<p class="loading-note">Lernbereich wird geladen...</p>';
+    let response;
+    try {
+      response = await fetch(`data/enzyme_ph_learning_data.json?version=${Date.now()}`, { cache: "no-store" });
+    } catch (error) {
+      response = await fetch("data/enzyme_ph_learning_data.json", { cache: "no-store" });
+    }
+    if (!response.ok) response = await fetch("data/enzyme_ph_learning_data.json", { cache: "no-store" });
+    phLearningData = repairTextDeep(await response.json());
+    renderPhLearning(phLearningData);
+  }
+
+  function repairTextDeep(value) {
+    if (Array.isArray(value)) return value.map(repairTextDeep);
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, repairTextDeep(item)]));
+    }
+    if (typeof value !== "string") return value;
+    try {
+      return decodeURIComponent(escape(value));
+    } catch (error) {
+      return value;
+    }
+  }
+
+  function renderPhLearning(data) {
+    const helper = window.PhEnzymeLearning;
+    const enzymes = helper.getEnzymes(data);
+    const coreEnzymes = helper.getCoreEnzymes(data);
+    phLearningIntro.textContent = data.meta?.description || "Kleinschrittiges Lernprogramm zur pH-Abhängigkeit von Enzymen.";
+    phLearningContent.innerHTML = "";
+
+    phLearningContent.append(
+      renderInfoSection("1. pH-Wert verstehen", [
+        "Die pH-Skala beschreibt, wie sauer oder alkalisch eine Lösung ist.",
+        "Kleine pH-Werte sind sauer, pH 7 ist neutral, größere pH-Werte sind alkalisch."
+      ], renderPhSortTask(data)),
+      renderInfoSection("2. Enzyme und aktives Zentrum", [
+        "Enzyme sind Proteine. Im aktiven Zentrum bindet das passende Substrat.",
+        "Wenn der pH-Wert stark vom Optimum abweicht, können Ladungen und Form des aktiven Zentrums verändert werden."
+      ], renderOrderTask(helper.getTaskById(data, "sequence_ph_effect_01"))),
+      renderInfoSection("3. pH-Optimum", [
+        "Jedes Enzym hat einen pH-Wert, bei dem es besonders gut arbeitet.",
+        "Dieser höchste Punkt der Aktivitätskurve heißt pH-Optimum."
+      ], renderDiagramReadingTask(data, helper.getTaskById(data, "read_pepsin_optimum_01"))),
+      renderInfoSection("4. Enzyme vergleichen", [
+        "Pepsin, Amylase und Trypsin sind an unterschiedliche Einsatzorte im Verdauungstrakt angepasst."
+      ], renderEnzymeComparisonTask(data, coreEnzymes)),
+      renderInfoSection("5. Diagramme zuordnen", [
+        "Die Kurven werden direkt aus den JSON-Daten gezeichnet."
+      ], renderDiagramMatchingTask(data, coreEnzymes)),
+      renderInfoSection("6. Enzyme im Verdauungstrakt", [
+        "Verdauungsenzyme wirken dort besonders gut, wo die pH-Bedingungen zu ihrem Optimum passen."
+      ], renderBodyRegionTask(data, enzymes)),
+      renderInfoSection("7. Wenn der pH-Wert nicht passt", [
+        "Außerhalb des pH-Optimums sinkt die Aktivität, weil das aktive Zentrum schlechter zum Substrat passt."
+      ], renderMismatchTasks(data)),
+      // Abschnitte 8 und 9 bleiben im Projekt erhalten, werden aktuell aber nicht angezeigt.
+    );
+  }
+
+  function renderInfoSection(title, paragraphs, taskElement) {
+    const section = document.createElement("section");
+    section.className = "learning-section";
+    section.innerHTML = `<h3>${escapeHtml(title)}</h3>${paragraphs.filter(Boolean).map((text) => `<p>${escapeHtml(text)}</p>`).join("")}`;
+    if (taskElement) section.appendChild(taskElement);
+    return section;
+  }
+
+  function renderPhSortTask(data) {
+    const task = window.PhEnzymeLearning.getTaskById(data, "ph_sort_01");
+    const categories = ["stark sauer", "nahe neutral", "neutral", "neutral bis leicht alkalisch", "alkalisch"];
+    const wrapper = createTaskWrapper(task.prompt);
+    wrapper.body.appendChild(createPhScaleImage());
+    const displayedItems = shuffle(task.items);
+    displayedItems.forEach((item, index) => {
+      wrapper.body.appendChild(createSelectRow(item.label, categories, `ph-sort-${index}`));
+    });
+    return wrapper.root;
+  }
+
+  function createPhScaleImage() {
+    const image = document.createElement("img");
+    image.className = "learning-image ph-scale-image";
+    image.src = "assets/images/pH-Skala.png";
+    image.alt = "pH-Skala von sauer über neutral bis alkalisch";
+    image.loading = "lazy";
+    return image;
+  }
+
+  function renderOrderTask(task) {
+    const wrapper = createTaskWrapper(task.prompt);
+    if (task.id === "sequence_ph_effect_01") {
+      wrapper.body.appendChild(createEnzymePhEffectImage());
+    }
+    const visibleItems = task.id === "sequence_ph_effect_01"
+      ? task.items.filter((item) => item.text !== "Ladungen im Enzym können sich verändern.")
+      : task.items;
+    const displayedItems = shuffle(visibleItems);
+    const positionOptions = shuffle(Array.from({ length: visibleItems.length }, (_, index) => index + 1));
+    displayedItems.forEach((item, index) => {
+      const row = document.createElement("label");
+      row.className = "choice-row";
+      row.innerHTML = `<span>${escapeHtml(item.text)}</span><select id="${task.id}-${index}"><option value="">Position wählen</option>${positionOptions.map((position) => `<option value="${position}">${position}</option>`).join("")}</select>`;
+      wrapper.body.appendChild(row);
+    });
+    return wrapper.root;
+  }
+
+  function createEnzymePhEffectImage() {
+    const image = document.createElement("img");
+    image.className = "learning-image enzyme-ph-effect-image";
+    image.src = "assets/images/enzymwirkung_pH_bearbeitet.png";
+    image.alt = "Modellhafte Darstellung: pH-Wert beeinflusst Ladungen, aktives Zentrum und Enzymaktivität";
+    image.loading = "lazy";
+    return image;
+  }
+
+  function renderDiagramReadingTask(data, task) {
+    const enzyme = window.PhEnzymeLearning.getEnzymeById(data, task.enzymeId);
+    if (task.checkMode === "model_solution_only") {
+      const wrapper = createModelSolutionTask(task);
+      wrapper.body.insertBefore(createCurveSvg(enzyme, true), wrapper.body.firstChild);
+      return wrapper.root;
+    }
+
+    const wrapper = createTaskWrapper(task.prompt);
+    wrapper.body.appendChild(createCurveSvg(enzyme, true));
+    const input = document.createElement("input");
+    input.id = task.id;
+    input.className = "short-input";
+    input.placeholder = "Antwort eingeben";
+    wrapper.body.appendChild(input);
+    addCheckButton(wrapper, () => feedback(task, window.PhEnzymeLearning.checkShortAnswer(task, input.value)));
+    return wrapper.root;
+  }
+
+  function renderEnzymeComparisonTask(data, coreEnzymes) {
+    const task = window.PhEnzymeLearning.getTaskById(data, "match_enzyme_cards_01");
+    if (task.type === "reading_memory_matching") {
+      return renderReadingMemoryMatchingTask(data, task);
+    }
+
+    const wrapper = createTaskWrapper(task.prompt);
+    const organs = ["Magen", "Mund / Dünndarm", "Dünndarm"];
+    const substrates = ["Proteine", "Stärke", "Proteine und Peptide"];
+    const optima = ["pH 2", "pH 7", "pH 8"];
+    shuffle(coreEnzymes).forEach((enzyme) => {
+      const card = document.createElement("div");
+      card.className = "match-card";
+      card.innerHTML = `<strong>${escapeHtml(enzyme.name)}</strong>`;
+      card.append(
+        createSelectRow("Einsatzort", shuffle(organs), `organ-${enzyme.id}`),
+        createSelectRow("Substrat", shuffle(substrates), `substrate-${enzyme.id}`),
+        createSelectRow("pH-Optimum", shuffle(optima), `optimum-${enzyme.id}`)
+      );
+      wrapper.body.appendChild(card);
+    });
+    return wrapper.root;
+  }
+
+  function renderReadingMemoryMatchingTask(data, task) {
+    const root = document.createElement("div");
+    root.className = "learning-task memory-task";
+
+    const readingPanel = document.createElement("div");
+    readingPanel.className = "memory-reading";
+    readingPanel.innerHTML = `
+      <p class="task-prompt">${escapeHtml(task.intro || "")}</p>
+      <div class="memory-reading-text">${formatReadingText(task.readingText || "")}</div>
+    `;
+
+    const startButton = document.createElement("button");
+    startButton.type = "button";
+    startButton.textContent = task.startButtonLabel || "Text schließen und Aufgabe starten";
+    readingPanel.appendChild(startButton);
+
+    const activity = createTaskWrapper(task.prompt);
+    activity.root.classList.add("view-hidden");
+    buildMatchingDropdowns(data, task, activity.body);
+
+    const actions = document.createElement("div");
+    actions.className = "memory-actions";
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "secondary";
+    resetButton.textContent = task.resetButtonLabel || "Aufgabe zurücksetzen";
+    const checkButton = document.createElement("button");
+    checkButton.type = "button";
+    checkButton.className = "secondary";
+    checkButton.textContent = "Überprüfen";
+    actions.append(resetButton, checkButton);
+    activity.root.appendChild(actions);
+
+    startButton.addEventListener("click", () => {
+      if (task.hideTextAfterStart !== false) readingPanel.classList.add("view-hidden");
+      startButton.classList.add("view-hidden");
+      activity.root.classList.remove("view-hidden");
+    });
+
+    resetButton.addEventListener("click", () => {
+      if (task.resetBehavior?.resetDropdowns !== false) {
+        task.pairs.forEach((pair) => {
+          getMatchingColumns(task).forEach((column) => {
+            setSelectValue(getMatchingSelectId(task, pair, column), "");
+          });
+        });
+      }
+      if (task.resetBehavior?.clearFeedback !== false) {
+        activity.feedbackBox.textContent = "";
+        activity.feedbackBox.classList.remove("is-visible");
+      }
+      if (task.resetBehavior?.keepReadingTextHidden !== false && task.hideTextAfterStart !== false) {
+        readingPanel.classList.add("view-hidden");
+        startButton.classList.add("view-hidden");
+      }
+    });
+
+    checkButton.addEventListener("click", () => {
+      const correct = isMatchingTaskCorrect(task);
+      activity.feedbackBox.textContent = correct ? task.feedbackCorrect : task.feedbackIncorrect;
+      activity.feedbackBox.classList.add("is-visible");
+    });
+
+    root.append(readingPanel, activity.root);
+    return root;
+  }
+
+  function buildMatchingDropdowns(data, task, body) {
+    const columns = getMatchingColumns(task);
+    const optionsByColumn = Object.fromEntries(columns.map((column) => [
+      column.id,
+      shuffle([...new Set(task.pairs.map((pair) => pair[column.id]).filter(Boolean))])
+    ]));
+
+    shuffle(task.pairs).forEach((pair) => {
+      const enzyme = window.PhEnzymeLearning.getEnzymeById(data, pair.enzymeId);
+      const card = document.createElement("div");
+      card.className = "match-card";
+      card.innerHTML = `<strong>${escapeHtml(pair.enzymeName || enzyme?.name || pair.enzymeId)}</strong>`;
+      columns.forEach((column) => {
+        card.appendChild(createSelectRow(column.label, optionsByColumn[column.id], getMatchingSelectId(task, pair, column)));
+      });
+      body.appendChild(card);
+    });
+  }
+
+  function isMatchingTaskCorrect(task) {
+    const columns = getMatchingColumns(task);
+    return task.pairs.every((pair) => {
+      return columns.every((column) => getSelectValue(getMatchingSelectId(task, pair, column)) === pair[column.id]);
+    });
+  }
+
+  function getMatchingColumns(task) {
+    if (Array.isArray(task.columns) && task.columns.length > 0) return task.columns;
+    return [
+      { id: "organ", label: "Einsatzort" },
+      { id: "substrate", label: "Substrat" },
+      { id: "phOptimum", label: "pH-Optimum" }
+    ];
+  }
+
+  function getMatchingSelectId(task, pair, column) {
+    return `matching-${task.id}-${pair.enzymeId}-${column.id}`;
+  }
+
+  function renderDiagramMatchingTask(data, coreEnzymes) {
+    const task = window.PhEnzymeLearning.getTaskById(data, "match_diagrams_01");
+    const wrapper = createTaskWrapper(task.prompt);
+    const enzymeOptions = shuffle(coreEnzymes).map((enzyme) => ({ label: enzyme.name, value: enzyme.id }));
+    shuffle(task.diagrams).forEach((diagram) => {
+      const enzyme = window.PhEnzymeLearning.getEnzymeById(data, diagram.correctEnzymeId);
+      const card = document.createElement("div");
+      card.className = "diagram-match-card";
+      card.appendChild(createCurveSvg(enzyme, false));
+      card.appendChild(createSelectRow("Diagramm gehört zu", enzymeOptions, `diagram-${diagram.diagramId}`));
+      wrapper.body.appendChild(card);
+    });
+    return wrapper.root;
+  }
+
+  function renderBodyRegionTask(data, enzymes) {
+    const module = window.PhEnzymeLearning.getModuleById(data, "digestive_tract");
+    const task = window.PhEnzymeLearning.getTaskById(data, "body_region_match_01");
+    const memoryTask = module?.tasks?.find((item) => item.type === "reading_memory_dragdrop");
+    const stack = document.createElement("div");
+    stack.className = "task-stack";
+
+    if (task) {
+      const wrapper = createTaskWrapper(task.prompt);
+      const regions = shuffle(task.regions).map((region) => ({ label: region.label, value: region.regionId }));
+      shuffle(["amylase", "pepsin", "trypsin", "lipase", "lactase"]).forEach((enzymeId) => {
+        const enzyme = window.PhEnzymeLearning.getEnzymeById(data, enzymeId);
+        wrapper.body.appendChild(createSelectRow(enzyme.name, regions, `region-${enzyme.id}`));
+      });
+      addCheckButton(wrapper, () => {
+        const correct = task.regions.every((region) => region.correctEnzymeIds.every((enzymeId) => getSelectValue(`region-${enzymeId}`) === region.regionId));
+        return feedback(task, correct);
+      });
+      stack.appendChild(wrapper.root);
+    }
+
+    if (memoryTask) {
+      stack.appendChild(renderReadingMemoryDragDropTask(memoryTask));
+    }
+
+    return stack;
+  }
+
+  function renderReadingMemoryDragDropTask(task) {
+    const root = document.createElement("div");
+    root.className = "learning-task memory-task";
+    const readingPanel = document.createElement("div");
+    readingPanel.className = "memory-reading";
+    readingPanel.innerHTML = `
+      <p class="task-prompt">${escapeHtml(task.intro || "")}</p>
+      <div class="memory-reading-text">${formatReadingText(task.readingText || "")}</div>
+    `;
+
+    const startButton = document.createElement("button");
+    startButton.type = "button";
+    startButton.textContent = task.startButtonLabel || "Text schließen und Aufgabe starten";
+    readingPanel.appendChild(startButton);
+
+    const activity = document.createElement("div");
+    activity.className = "memory-activity view-hidden";
+    activity.innerHTML = `<p class="task-prompt">${escapeHtml(task.prompt || "")}</p>`;
+
+    const board = document.createElement("div");
+    board.className = "memory-board";
+    const sourceZone = createMemoryZone("source", "Karten");
+    board.appendChild(sourceZone.zone);
+
+    const targetGrid = document.createElement("div");
+    targetGrid.className = "memory-target-grid";
+    task.targets.forEach((target) => {
+      const targetZone = createMemoryZone(target.id, target.label);
+      targetGrid.appendChild(targetZone.zone);
+    });
+    board.appendChild(targetGrid);
+    activity.appendChild(board);
+
+    const actions = document.createElement("div");
+    actions.className = "memory-actions";
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "secondary";
+    resetButton.textContent = task.resetButtonLabel || "Aufgabe zurücksetzen";
+    const checkButton = document.createElement("button");
+    checkButton.type = "button";
+    checkButton.className = "secondary";
+    checkButton.textContent = "Überprüfen";
+    actions.append(resetButton, checkButton);
+
+    const feedbackBox = document.createElement("p");
+    feedbackBox.className = "task-feedback";
+    activity.append(actions, feedbackBox);
+    root.append(readingPanel, activity);
+
+    const placements = {};
+    const displayedCards = shuffle(task.cards);
+    displayedCards.forEach((card) => {
+      placements[card.id] = "source";
+    });
+
+    startButton.addEventListener("click", () => {
+      if (task.hideTextAfterStart !== false) readingPanel.classList.add("view-hidden");
+      startButton.classList.add("view-hidden");
+      activity.classList.remove("view-hidden");
+    });
+
+    resetButton.addEventListener("click", () => {
+      if (task.resetBehavior?.moveCardsToStart !== false) {
+        displayedCards.forEach((card) => {
+          placements[card.id] = "source";
+        });
+      }
+      if (task.resetBehavior?.clearFeedback !== false) {
+        feedbackBox.textContent = "";
+        feedbackBox.classList.remove("is-visible");
+      }
+      if (task.resetBehavior?.keepReadingTextHidden !== false && task.hideTextAfterStart !== false) {
+        readingPanel.classList.add("view-hidden");
+        startButton.classList.add("view-hidden");
+      }
+      renderMemoryCards();
+    });
+
+    checkButton.addEventListener("click", () => {
+      const correct = isMemoryTaskCorrect(task, placements);
+      feedbackBox.textContent = correct ? task.feedbackCorrect : task.feedbackIncorrect;
+      feedbackBox.classList.add("is-visible");
+    });
+
+    setupMemoryDropZone(sourceZone.zone, moveCard);
+    targetGrid.querySelectorAll(".memory-zone").forEach((zone) => setupMemoryDropZone(zone, moveCard));
+
+    function moveCard(cardId, targetId) {
+      if (!displayedCards.some((card) => card.id === cardId)) return;
+      placements[cardId] = targetId;
+      feedbackBox.textContent = "";
+      feedbackBox.classList.remove("is-visible");
+      renderMemoryCards();
+    }
+
+    function renderMemoryCards() {
+      root.querySelectorAll(".memory-card-list").forEach((list) => {
+        list.innerHTML = "";
+      });
+
+      displayedCards.forEach((card) => {
+        const zoneId = placements[card.id] || "source";
+        const list = root.querySelector(`[data-target-id="${cssEscape(zoneId)}"] .memory-card-list`);
+        if (!list) return;
+        const cardElement = createMemoryCard(card);
+        list.appendChild(cardElement);
+      });
+    }
+
+    function createMemoryCard(card) {
+      const element = document.createElement("button");
+      element.type = "button";
+      element.className = `memory-card memory-card-${normalizeClassToken(card.cardType || "default")}`;
+      element.draggable = true;
+      element.dataset.cardId = card.id;
+      element.innerHTML = `<span>${escapeHtml(card.cardType || "Karte")}</span>${escapeHtml(card.label)}`;
+
+      element.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", card.id);
+        event.dataTransfer.effectAllowed = "move";
+      });
+      setupPointerDrag(element, moveCard);
+      return element;
+    }
+
+    renderMemoryCards();
+    return root;
+  }
+
+  function createMemoryZone(targetId, label) {
+    const zone = document.createElement("div");
+    zone.className = targetId === "source" ? "memory-zone memory-source" : "memory-zone memory-target";
+    zone.dataset.targetId = targetId;
+    zone.innerHTML = `<strong>${escapeHtml(label)}</strong><div class="memory-card-list"></div>`;
+    return { zone };
+  }
+
+  function setupMemoryDropZone(zone, moveCard) {
+    zone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      zone.classList.add("is-over");
+    });
+    zone.addEventListener("dragleave", () => {
+      zone.classList.remove("is-over");
+    });
+    zone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      zone.classList.remove("is-over");
+      const cardId = event.dataTransfer.getData("text/plain");
+      moveCard(cardId, zone.dataset.targetId);
+    });
+  }
+
+  function setupPointerDrag(card, moveCard) {
+    let ghost = null;
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    card.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse") return;
+      startX = event.clientX;
+      startY = event.clientY;
+      dragging = true;
+      card.setPointerCapture(event.pointerId);
+      ghost = card.cloneNode(true);
+      ghost.classList.add("memory-card-ghost");
+      document.body.appendChild(ghost);
+      positionGhost(ghost, event.clientX, event.clientY);
+      event.preventDefault();
+    });
+
+    card.addEventListener("pointermove", (event) => {
+      if (!dragging || !ghost) return;
+      positionGhost(ghost, event.clientX, event.clientY);
+      event.preventDefault();
+    });
+
+    card.addEventListener("pointerup", (event) => {
+      if (!dragging) return;
+      const cardId = card.dataset.cardId;
+      cleanupGhost();
+      dragging = false;
+      const dropTarget = document.elementFromPoint(event.clientX, event.clientY)?.closest(".memory-zone");
+      if (dropTarget?.dataset?.targetId) moveCard(cardId, dropTarget.dataset.targetId);
+      event.preventDefault();
+    });
+
+    card.addEventListener("pointercancel", () => {
+      cleanupGhost();
+      dragging = false;
+    });
+
+    function cleanupGhost() {
+      if (ghost) ghost.remove();
+      ghost = null;
+    }
+  }
+
+  function positionGhost(ghost, x, y) {
+    ghost.style.left = `${x}px`;
+    ghost.style.top = `${y}px`;
+  }
+
+  function isMemoryTaskCorrect(task, placements) {
+    const allTargetCardIds = new Set(task.targets.flatMap((target) => target.correctCards));
+    const noCardLeftInSource = task.cards.every((card) => placements[card.id] !== "source");
+    if (!noCardLeftInSource) return false;
+    if (!task.cards.every((card) => allTargetCardIds.has(card.id))) return false;
+
+    return task.targets.every((target) => {
+      const expected = [...target.correctCards].sort();
+      const actual = task.cards
+        .filter((card) => placements[card.id] === target.id)
+        .map((card) => card.id)
+        .sort();
+      return expected.length === actual.length && expected.every((cardId, index) => cardId === actual[index]);
+    });
+  }
+
+  function formatReadingText(text) {
+    return String(text || "")
+      .split(/\n{2,}/)
+      .map((paragraph) => `<p>${escapeHtml(paragraph.trim())}</p>`)
+      .join("");
+  }
+
+  function cssEscape(value) {
+    if (window.CSS?.escape) return window.CSS.escape(value);
+    return String(value).replace(/"/g, '\\"');
+  }
+
+  function normalizeClassToken(value) {
+    return String(value || "default")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-|-$/g, "") || "default";
+  }
+
+  function renderMismatchTasks(data) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "task-stack";
+    wrapper.append(
+      renderMultipleChoiceTask(window.PhEnzymeLearning.getTaskById(data, "case_amylase_stomach_01")),
+      renderShortAnswerTask(window.PhEnzymeLearning.getTaskById(data, "case_trypsin_stomach_01"), "Warum wäre Trypsin im Magen kaum aktiv?"),
+      renderPromptOnlyTask("Warum arbeitet Pepsin im Dünndarm nicht optimal?", "Pepsin hat sein Optimum im stark sauren Magen. Im Dünndarm ist der pH-Wert eher neutral bis alkalisch, daher passt die Form des aktiven Zentrums weniger gut.")
+    );
+    return wrapper;
+  }
+
+  function renderHypochlorhydriaTasks(data) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "task-stack";
+    wrapper.append(
+      renderMultipleChoiceTask(window.PhEnzymeLearning.getTaskById(data, "hypo_step_01")),
+      renderDiagramReadingTask(data, window.PhEnzymeLearning.getTaskById(data, "hypo_step_02")),
+      renderOrderTask(createHypochlorhydriaChainTask(window.PhEnzymeLearning.getTaskById(data, "hypo_step_03"))),
+      renderShortAnswerTask(window.PhEnzymeLearning.getTaskById(data, "hypo_transfer_01"))
+    );
+    return wrapper;
+  }
+
+  function createHypochlorhydriaChainTask(baseTask) {
+    return {
+      ...baseTask,
+      items: [
+        { text: "Es wird zu wenig Magensäure gebildet.", order: 1 },
+        { text: "Der pH-Wert im Magen steigt.", order: 2 },
+        { text: "Pepsinogen wird schlechter zu Pepsin aktiviert.", order: 3 },
+        { text: "Pepsin arbeitet schlechter.", order: 4 },
+        { text: "Proteine werden im Magen schlechter vorverdaut.", order: 5 },
+        { text: "Es kann zu Verdauungsbeschwerden kommen.", order: 6 }
+      ]
+    };
+  }
+
+  function renderSelfCheck(data) {
+    const task = window.PhEnzymeLearning.getTaskById(data, "final_selfcheck_01");
+    const wrapper = createTaskWrapper(task.prompt);
+    task.items.forEach((item, index) => {
+      const label = document.createElement("label");
+      label.className = "checkbox-row";
+      label.innerHTML = `<input type="checkbox" id="self-${index}"><span>${escapeHtml(item)}</span>`;
+      wrapper.body.appendChild(label);
+    });
+    addCheckButton(wrapper, () => {
+      const checked = task.items.filter((_, index) => document.getElementById(`self-${index}`).checked).length;
+      return checked === task.items.length
+        ? "Stark. Du hast alle Punkte abgehakt."
+        : `Du hast ${checked} von ${task.items.length} Punkten abgehakt.`;
+    });
+    return wrapper.root;
+  }
+
+  function renderMultipleChoiceTask(task) {
+    const wrapper = createTaskWrapper(task.prompt);
+    shuffle(task.options).forEach((option) => {
+      const label = document.createElement("label");
+      label.className = "checkbox-row";
+      label.innerHTML = `<input type="radio" name="${task.id}" value="${option.id}"><span>${escapeHtml(option.text)}</span>`;
+      wrapper.body.appendChild(label);
+    });
+    addCheckButton(wrapper, () => {
+      const selected = wrapper.root.querySelector(`input[name="${task.id}"]:checked`);
+      const option = task.options.find((item) => item.id === selected?.value);
+      return feedback(task, Boolean(option?.correct));
+    });
+    return wrapper.root;
+  }
+
+  function renderShortAnswerTask(task, promptOverride) {
+    if (task.checkMode === "model_solution_only") {
+      return createModelSolutionTask(task, promptOverride).root;
+    }
+
+    const wrapper = createTaskWrapper(promptOverride || task.prompt);
+    const textarea = document.createElement("textarea");
+    textarea.className = "short-answer";
+    textarea.placeholder = "Antwort formulieren";
+    wrapper.body.appendChild(textarea);
+    addCheckButton(wrapper, () => {
+      const correct = window.PhEnzymeLearning.checkShortAnswer(task, textarea.value);
+      return correct ? "Gute Erklärung. Wichtige Fachbegriffe sind enthalten." : `Vergleiche mit dieser Musterlösung: ${task.sampleAnswer}`;
+    });
+    return wrapper.root;
+  }
+
+  function createModelSolutionTask(task, promptOverride) {
+    const wrapper = createTaskWrapper(promptOverride || task.prompt);
+    const textarea = document.createElement("textarea");
+    textarea.className = "short-answer";
+    textarea.placeholder = "Antwort formulieren";
+    wrapper.body.appendChild(textarea);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary";
+    button.textContent = "Musterlösung";
+    button.addEventListener("click", () => {
+      if (wrapper.feedbackBox.classList.contains("is-visible")) {
+        wrapper.feedbackBox.innerHTML = "";
+        wrapper.feedbackBox.classList.remove("is-visible", "self-check-feedback");
+        return;
+      }
+
+      wrapper.feedbackBox.innerHTML = `
+        <strong>Musterlösung zur Selbstkontrolle</strong>
+        ${task.selfComparePrompt ? `<span>${escapeHtml(task.selfComparePrompt)}</span>` : ""}
+        <span>${escapeHtml(task.modelSolution || task.sampleAnswer || "")}</span>
+      `;
+      wrapper.feedbackBox.classList.add("is-visible", "self-check-feedback");
+    });
+    wrapper.root.appendChild(button);
+    return wrapper;
+  }
+
+  function renderPromptOnlyTask(prompt, sampleAnswer) {
+    const wrapper = createTaskWrapper(prompt);
+    const textarea = document.createElement("textarea");
+    textarea.className = "short-answer";
+    textarea.placeholder = "Antwort formulieren";
+    wrapper.body.appendChild(textarea);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary";
+    button.textContent = "Musterlösung";
+    button.addEventListener("click", () => {
+      if (wrapper.feedbackBox.classList.contains("is-visible")) {
+        wrapper.feedbackBox.innerHTML = "";
+        wrapper.feedbackBox.classList.remove("is-visible", "self-check-feedback");
+        return;
+      }
+
+      wrapper.feedbackBox.innerHTML = `
+        <strong>Musterlösung zur Selbstkontrolle</strong>
+        <span>Vergleiche deine Antwort mit der Musterlösung.</span>
+        <span>${escapeHtml(sampleAnswer)}</span>
+      `;
+      wrapper.feedbackBox.classList.add("is-visible", "self-check-feedback");
+    });
+    wrapper.root.appendChild(button);
+    return wrapper.root;
+  }
+
+  function createTaskWrapper(prompt) {
+    const root = document.createElement("div");
+    root.className = "learning-task";
+    const body = document.createElement("div");
+    body.className = "task-body";
+    root.innerHTML = `<p class="task-prompt">${escapeHtml(prompt)}</p>`;
+    root.appendChild(body);
+    const feedbackBox = document.createElement("p");
+    feedbackBox.className = "task-feedback";
+    root.appendChild(feedbackBox);
+    return { root, body, feedbackBox };
+  }
+
+  function createSelectRow(labelText, options, id) {
+    const label = document.createElement("label");
+    label.className = "choice-row";
+    const normalizedOptions = shuffle(options).map((option) => typeof option === "string" ? { label: option, value: option } : option);
+    label.innerHTML = `<span>${escapeHtml(labelText)}</span><select id="${id}"><option value="">auswählen</option>${normalizedOptions.map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join("")}</select>`;
+    return label;
+  }
+
+  function addCheckButton(wrapper, evaluate) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary";
+    button.textContent = "Prüfen";
+    button.addEventListener("click", () => {
+      wrapper.feedbackBox.textContent = evaluate();
+      wrapper.feedbackBox.classList.add("is-visible");
+    });
+    wrapper.root.appendChild(button);
+  }
+
+  function feedback(task, correct) {
+    return window.PhEnzymeLearning.getFeedback(task, correct);
+  }
+
+  function getSelectValue(id) {
+    return document.getElementById(id)?.value || "";
+  }
+
+  function setSelectValue(id, value) {
+    const select = document.getElementById(id);
+    if (select) select.value = value;
+  }
+
+  function shuffle(items) {
+    const copy = [...items];
+    for (let index = copy.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+    }
+    return copy;
+  }
+
+  function createCurveSvg(enzyme, withTitle) {
+    const imagePaths = {
+      pepsin: "assets/images/diagramm_pepsin.png",
+      amylase: "assets/images/diagramm_Amylase.png",
+      trypsin: "assets/images/diagramm_trypsin.png"
+    };
+    const image = document.createElement("img");
+    image.className = "ph-curve ph-curve-image";
+    image.src = imagePaths[enzyme.id] || "";
+    image.alt = `${withTitle ? enzyme.name + ": " : ""}Diagramm zur pH-Abhängigkeit der Enzymaktivität`;
+    image.loading = "lazy";
+    return image;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   temperatureSlider.addEventListener("input", () => {
-    selectedTemperature = Number(temperatureSlider.value);
+    selectedTemperature = getSelectedSliderTemperature();
     runState = createInitialState(selectedTemperature);
     updateTemperatureDisplay();
     updateDisplays();
@@ -639,10 +1482,15 @@
   pauseButton.addEventListener("click", pauseRun);
   stopButton.addEventListener("click", stopRun);
   clearPointsButton.addEventListener("click", clearPoints);
+  openTemperatureSimulation.addEventListener("click", () => showView("temperature"));
+  openPhLearning.addEventListener("click", openPhLearningArea);
+  backToHomeFromPh.addEventListener("click", () => showView("home"));
 
+  setupTemperatureControl();
   updateTemperatureDisplay();
   updateDisplays();
   setControlsForStatus("idle");
   drawSimulation();
   drawChart();
+  showView("home");
 })();

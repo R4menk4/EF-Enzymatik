@@ -1,0 +1,859 @@
+{
+  "meta": {
+    "title": "pH-Abhängigkeit von Enzymen",
+    "targetGroup": "Biologie EF / Klasse 11",
+    "description": "Datenbasis für ein kleinschrittiges Lernprogramm zur pH-Abhängigkeit von Verdauungsenzymen bis zum Transferfall Hypochlorhydrie/Achlorhydrie.",
+    "version": "1.4",
+    "language": "de"
+  },
+  "phScale": {
+    "min": 0,
+    "max": 14,
+    "categories": [
+      {
+        "label": "stark sauer",
+        "range": [
+          0,
+          3
+        ]
+      },
+      {
+        "label": "schwach sauer",
+        "range": [
+          4,
+          6
+        ]
+      },
+      {
+        "label": "neutral",
+        "range": [
+          7,
+          7
+        ]
+      },
+      {
+        "label": "leicht alkalisch",
+        "range": [
+          8,
+          9
+        ]
+      },
+      {
+        "label": "stark alkalisch",
+        "range": [
+          10,
+          14
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "name": "Magensaft",
+        "ph": "1,5–2",
+        "category": "stark sauer"
+      },
+      {
+        "name": "Speichel",
+        "ph": "6–7",
+        "category": "nahe neutral"
+      },
+      {
+        "name": "Dünndarm",
+        "ph": "7–8",
+        "category": "neutral bis leicht alkalisch"
+      },
+      {
+        "name": "Wasser",
+        "ph": "7",
+        "category": "neutral"
+      },
+      {
+        "name": "Seifenlösung",
+        "ph": "9–10",
+        "category": "alkalisch"
+      }
+    ]
+  },
+  "enzymes": [
+    {
+      "id": "pepsin",
+      "name": "Pepsin",
+      "organ": "Magen",
+      "bodyRegion": "Magensaft",
+      "substrate": "Proteine",
+      "products": "kürzere Peptidketten",
+      "phOptimum": 2,
+      "highActivityRange": [
+        1.5,
+        3
+      ],
+      "phEnvironment": "stark sauer",
+      "shortFunction": "Pepsin beginnt im Magen die Eiweißverdauung.",
+      "explanation": "Pepsin arbeitet am besten im stark sauren Milieu des Magens. Bei höherem pH-Wert wird Pepsinogen schlechter zu Pepsin aktiviert und Pepsin spaltet Proteine weniger effektiv.",
+      "curve": [
+        {
+          "ph": 0,
+          "activity": 20
+        },
+        {
+          "ph": 1,
+          "activity": 70
+        },
+        {
+          "ph": 2,
+          "activity": 100
+        },
+        {
+          "ph": 3,
+          "activity": 65
+        },
+        {
+          "ph": 4,
+          "activity": 20
+        },
+        {
+          "ph": 5,
+          "activity": 5
+        },
+        {
+          "ph": 6,
+          "activity": 0
+        },
+        {
+          "ph": 7,
+          "activity": 0
+        },
+        {
+          "ph": 8,
+          "activity": 0
+        },
+        {
+          "ph": 9,
+          "activity": 0
+        },
+        {
+          "ph": 10,
+          "activity": 0
+        },
+        {
+          "ph": 11,
+          "activity": 0
+        },
+        {
+          "ph": 12,
+          "activity": 0
+        }
+      ]
+    },
+    {
+      "id": "amylase",
+      "name": "Amylase",
+      "organ": "Mund / Dünndarm",
+      "bodyRegion": "Speichel und Bauchspeichel",
+      "substrate": "Stärke",
+      "products": "Maltose und kürzere Zuckerketten",
+      "phOptimum": 7,
+      "highActivityRange": [
+        5.5,
+        8
+      ],
+      "phEnvironment": "nahe neutral",
+      "shortFunction": "Amylase spaltet Stärke in kleinere Zuckerbausteine.",
+      "explanation": "Amylase arbeitet besonders gut im neutralen bis leicht sauren Bereich, zum Beispiel im Mund. Im stark sauren Magen ist ihre Aktivität deutlich vermindert.",
+      "curve": [
+        {
+          "ph": 0,
+          "activity": 0
+        },
+        {
+          "ph": 1,
+          "activity": 0
+        },
+        {
+          "ph": 2,
+          "activity": 0
+        },
+        {
+          "ph": 3,
+          "activity": 5
+        },
+        {
+          "ph": 4,
+          "activity": 15
+        },
+        {
+          "ph": 5,
+          "activity": 45
+        },
+        {
+          "ph": 6,
+          "activity": 80
+        },
+        {
+          "ph": 7,
+          "activity": 100
+        },
+        {
+          "ph": 8,
+          "activity": 70
+        },
+        {
+          "ph": 9,
+          "activity": 25
+        },
+        {
+          "ph": 10,
+          "activity": 5
+        },
+        {
+          "ph": 11,
+          "activity": 0
+        },
+        {
+          "ph": 12,
+          "activity": 0
+        }
+      ]
+    },
+    {
+      "id": "trypsin",
+      "name": "Trypsin",
+      "organ": "Dünndarm",
+      "bodyRegion": "Dünndarmsaft",
+      "substrate": "Proteine und Peptide",
+      "products": "kleinere Peptide",
+      "phOptimum": 8,
+      "highActivityRange": [
+        7,
+        9
+      ],
+      "phEnvironment": "leicht alkalisch",
+      "shortFunction": "Trypsin setzt im Dünndarm die Eiweißverdauung fort.",
+      "explanation": "Trypsin arbeitet im leicht alkalischen Milieu des Dünndarms. Im sauren Magen wäre seine Aktivität sehr gering.",
+      "curve": [
+        {
+          "ph": 0,
+          "activity": 0
+        },
+        {
+          "ph": 1,
+          "activity": 0
+        },
+        {
+          "ph": 2,
+          "activity": 0
+        },
+        {
+          "ph": 3,
+          "activity": 0
+        },
+        {
+          "ph": 4,
+          "activity": 5
+        },
+        {
+          "ph": 5,
+          "activity": 15
+        },
+        {
+          "ph": 6,
+          "activity": 45
+        },
+        {
+          "ph": 7,
+          "activity": 80
+        },
+        {
+          "ph": 8,
+          "activity": 100
+        },
+        {
+          "ph": 9,
+          "activity": 75
+        },
+        {
+          "ph": 10,
+          "activity": 35
+        },
+        {
+          "ph": 11,
+          "activity": 10
+        },
+        {
+          "ph": 12,
+          "activity": 0
+        }
+      ]
+    },
+    {
+      "id": "lipase",
+      "name": "Lipase",
+      "organ": "Dünndarm",
+      "bodyRegion": "Bauchspeichel / Dünndarm",
+      "substrate": "Fette",
+      "products": "Glycerin und Fettsäuren",
+      "phOptimum": 8,
+      "highActivityRange": [
+        7,
+        9
+      ],
+      "phEnvironment": "neutral bis leicht alkalisch",
+      "shortFunction": "Lipase spaltet Fette in Glycerin und Fettsäuren.",
+      "explanation": "Lipase wirkt vor allem im Dünndarm. Die Galle emulgiert Fette, ist aber selbst kein Enzym.",
+      "curve": [
+        {
+          "ph": 0,
+          "activity": 0
+        },
+        {
+          "ph": 1,
+          "activity": 0
+        },
+        {
+          "ph": 2,
+          "activity": 0
+        },
+        {
+          "ph": 3,
+          "activity": 5
+        },
+        {
+          "ph": 4,
+          "activity": 10
+        },
+        {
+          "ph": 5,
+          "activity": 25
+        },
+        {
+          "ph": 6,
+          "activity": 55
+        },
+        {
+          "ph": 7,
+          "activity": 85
+        },
+        {
+          "ph": 8,
+          "activity": 100
+        },
+        {
+          "ph": 9,
+          "activity": 80
+        },
+        {
+          "ph": 10,
+          "activity": 40
+        },
+        {
+          "ph": 11,
+          "activity": 10
+        },
+        {
+          "ph": 12,
+          "activity": 0
+        }
+      ]
+    },
+    {
+      "id": "lactase",
+      "name": "Lactase",
+      "organ": "Dünndarmwand",
+      "bodyRegion": "Dünndarmschleimhaut",
+      "substrate": "Lactose",
+      "products": "Glucose und Galactose",
+      "phOptimum": 6,
+      "highActivityRange": [
+        5.5,
+        7
+      ],
+      "phEnvironment": "leicht sauer bis neutral",
+      "shortFunction": "Lactase spaltet Milchzucker.",
+      "explanation": "Lactase sitzt an der Dünndarmwand und spaltet Lactose in Glucose und Galactose.",
+      "curve": [
+        {
+          "ph": 0,
+          "activity": 0
+        },
+        {
+          "ph": 1,
+          "activity": 0
+        },
+        {
+          "ph": 2,
+          "activity": 5
+        },
+        {
+          "ph": 3,
+          "activity": 15
+        },
+        {
+          "ph": 4,
+          "activity": 35
+        },
+        {
+          "ph": 5,
+          "activity": 75
+        },
+        {
+          "ph": 6,
+          "activity": 100
+        },
+        {
+          "ph": 7,
+          "activity": 80
+        },
+        {
+          "ph": 8,
+          "activity": 35
+        },
+        {
+          "ph": 9,
+          "activity": 10
+        },
+        {
+          "ph": 10,
+          "activity": 0
+        },
+        {
+          "ph": 11,
+          "activity": 0
+        },
+        {
+          "ph": 12,
+          "activity": 0
+        }
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "ph_basics",
+      "title": "1. pH-Wert verstehen",
+      "learningGoal": "Ich kann saure, neutrale und alkalische pH-Werte unterscheiden.",
+      "tasks": [
+        {
+          "id": "ph_sort_01",
+          "type": "sort",
+          "prompt": "Ordne die Beispiele dem passenden pH-Bereich zu.",
+          "items": [
+            {
+              "label": "Magensaft",
+              "correctCategory": "stark sauer"
+            },
+            {
+              "label": "Wasser",
+              "correctCategory": "neutral"
+            },
+            {
+              "label": "Speichel",
+              "correctCategory": "nahe neutral"
+            },
+            {
+              "label": "Dünndarm",
+              "correctCategory": "neutral bis leicht alkalisch"
+            },
+            {
+              "label": "Seifenlösung",
+              "correctCategory": "alkalisch"
+            }
+          ],
+          "feedbackCorrect": "Richtig. Der Magen ist stark sauer, der Dünndarm eher neutral bis leicht alkalisch.",
+          "feedbackIncorrect": "Überprüfe noch einmal die pH-Skala: kleine pH-Werte sind sauer, pH 7 ist neutral."
+        }
+      ]
+    },
+    {
+      "id": "enzyme_structure",
+      "title": "2. Enzymstruktur und aktives Zentrum",
+      "learningGoal": "Ich kann erklären, warum der pH-Wert die Enzymaktivität beeinflusst.",
+      "image": {
+        "src": "assets/images/ph_aktives_zentrum_geschaedigt.png",
+        "alt": "Bilderreihe zur Veränderung des aktiven Zentrums bei falschem pH-Wert",
+        "caption": "Ein falscher pH-Wert kann die Form des aktiven Zentrums verändern. Das Substrat passt dann schlechter oder gar nicht mehr."
+      },
+      "tasks": [
+        {
+          "id": "sequence_ph_effect_01",
+          "type": "order",
+          "prompt": "Bringe die Ursache-Wirkungs-Kette in die richtige Reihenfolge.",
+          "items": [
+            {
+              "text": "Der pH-Wert verändert sich stark.",
+              "order": 1
+            },
+            {
+              "text": "Ladungen im Enzym können sich verändern.",
+              "order": 2
+            },
+            {
+              "text": "Die Form des aktiven Zentrums kann sich verändern.",
+              "order": 3
+            },
+            {
+              "text": "Das Substrat passt schlechter.",
+              "order": 4
+            },
+            {
+              "text": "Die Enzymaktivität sinkt.",
+              "order": 5
+            }
+          ],
+          "feedbackCorrect": "Genau. Der pH-Wert beeinflusst die Struktur und damit die Funktion des Enzyms.",
+          "feedbackIncorrect": "Denke vom äußeren Einfluss aus: Erst verändert sich der pH-Wert, danach die Struktur und zuletzt die Aktivität."
+        }
+      ]
+    },
+    {
+      "id": "ph_optimum",
+      "title": "3. pH-Optimum erkennen",
+      "learningGoal": "Ich kann aus einem Diagramm das pH-Optimum eines Enzyms ablesen.",
+      "tasks": [
+        {
+          "id": "read_pepsin_optimum_01",
+          "type": "diagram_reading",
+          "checkMode": "model_solution_only",
+          "answerInput": "free_text",
+          "enzymeId": "pepsin",
+          "prompt": "Lies aus dem Diagramm ab: Bei welchem pH-Wert arbeitet dieses Enzym am besten?",
+          "modelSolutionButtonLabel": "Musterlösung anzeigen",
+          "selfComparePrompt": "Vergleiche deine Antwort mit der Musterlösung. Hast du den höchsten Punkt der Kurve erkannt und den passenden pH-Wert genannt?",
+          "modelSolution": "Das Enzym arbeitet bei ungefähr pH 2 am besten. Dort liegt der höchste Punkt der Kurve. Dieser pH-Wert ist das pH-Optimum des Enzyms."
+        }
+      ]
+    },
+    {
+      "id": "enzyme_comparison",
+      "title": "4. Pepsin, Amylase und Trypsin vergleichen",
+      "learningGoal": "Ich kann Enzyme nach Substrat, pH-Optimum und pH-Milieu vergleichen.",
+      "tasks": [
+        {
+          "id": "match_enzyme_cards_01",
+          "type": "reading_memory_matching",
+          "intro": "Lies den folgenden Text aufmerksam. Danach schließt du den Text mit einem Klick auf den Button. Anschließend sollst du aus dem Gedächtnis drei Enzyme nach Substrat, pH-Optimum und pH-Milieu vergleichen. Hier werden also dein Leseverständnis und dein Gedächtnis geprüft.",
+          "readingText": "Enzyme unterscheiden sich darin, welche Stoffe sie spalten und bei welchem pH-Wert sie besonders aktiv sind. Pepsin spaltet Proteine und arbeitet am besten im stark sauren Bereich, ungefähr bei pH 2. Amylase spaltet Stärke und arbeitet am besten in einem ungefähr neutralen Bereich, etwa bei pH 7. Trypsin spaltet Proteine und Peptide weiter und hat sein Optimum im leicht alkalischen Bereich, ungefähr bei pH 8.\n\nDie pH-Optima zeigen, dass Enzyme an bestimmte Bedingungen angepasst sind. Ein Enzym arbeitet also nicht überall gleich gut, sondern besonders gut in dem pH-Milieu, das zu seiner Struktur und seinem aktiven Zentrum passt.",
+          "startButtonLabel": "Text schließen und Aufgabe starten",
+          "resetButtonLabel": "Aufgabe zurücksetzen",
+          "hideTextAfterStart": true,
+          "allowTextReopen": false,
+          "prompt": "Ordne aus dem Gedächtnis Substrat, pH-Optimum und pH-Milieu passend zu.",
+          "columns": [
+            {
+              "id": "substrate",
+              "label": "Substrat"
+            },
+            {
+              "id": "phOptimum",
+              "label": "pH-Optimum"
+            },
+            {
+              "id": "phEnvironment",
+              "label": "pH-Milieu"
+            }
+          ],
+          "pairs": [
+            {
+              "enzymeId": "pepsin",
+              "enzymeName": "Pepsin",
+              "substrate": "Proteine",
+              "phOptimum": "pH 2",
+              "phEnvironment": "stark sauer"
+            },
+            {
+              "enzymeId": "amylase",
+              "enzymeName": "Amylase",
+              "substrate": "Stärke",
+              "phOptimum": "pH 7",
+              "phEnvironment": "ungefähr neutral"
+            },
+            {
+              "enzymeId": "trypsin",
+              "enzymeName": "Trypsin",
+              "substrate": "Proteine und Peptide",
+              "phOptimum": "pH 8",
+              "phEnvironment": "leicht alkalisch"
+            }
+          ],
+          "feedbackCorrect": "Richtig! Du hast die Enzyme nach Substrat, pH-Optimum und pH-Milieu korrekt verglichen.",
+          "feedbackIncorrect": "Das stimmt noch nicht ganz. Überlege: Pepsin arbeitet stark sauer, Amylase ungefähr neutral und Trypsin leicht alkalisch.",
+          "resetBehavior": {
+            "resetDropdowns": true,
+            "clearFeedback": true,
+            "keepReadingTextHidden": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "diagram_matching",
+      "title": "5. Diagramme zuordnen",
+      "learningGoal": "Ich kann pH-Aktivitätsdiagramme den passenden Enzymen zuordnen.",
+      "tasks": [
+        {
+          "id": "match_diagrams_01",
+          "type": "diagram_matching",
+          "prompt": "Ordne die Diagramme den passenden Enzymen zu.",
+          "diagrams": [
+            {
+              "diagramId": "curve_peak_ph2",
+              "correctEnzymeId": "pepsin",
+              "hint": "Maximum im stark sauren Bereich"
+            },
+            {
+              "diagramId": "curve_peak_ph7",
+              "correctEnzymeId": "amylase",
+              "hint": "Maximum nahe neutral"
+            },
+            {
+              "diagramId": "curve_peak_ph8",
+              "correctEnzymeId": "trypsin",
+              "hint": "Maximum im leicht alkalischen Bereich"
+            }
+          ],
+          "feedbackCorrect": "Richtig. Du hast die pH-Optima richtig erkannt.",
+          "feedbackIncorrect": "Lies zuerst das Maximum der Kurve ab und vergleiche es mit dem Einsatzort des Enzyms."
+        }
+      ]
+    },
+    {
+      "id": "digestive_tract",
+      "title": "6. Enzyme im Verdauungstrakt",
+      "learningGoal": "Ich kann Informationen aus einem Text nutzen, um Enzyme und pH-Bereiche den Abschnitten des Verdauungstrakts zuzuordnen.",
+      "tasks": [
+        {
+          "id": "digestive_tract_reading_memory_01",
+          "type": "reading_memory_dragdrop",
+          "intro": "Lies den folgenden Text aufmerksam. Danach schließt du den Text mit einem Klick auf den Button. Anschließend sollst du aus dem Gedächtnis die passenden pH-Bereiche und Enzyme den Abschnitten des Verdauungstrakts zuordnen. Hier werden also dein Leseverständnis und dein Gedächtnis geprüft.",
+          "readingText": "Im Verdauungstrakt herrschen nicht überall die gleichen Bedingungen. Schon im Mund beginnt die Verdauung: Der Speichel ist ungefähr neutral und hat meist einen pH-Wert um 7. Dort kann die Amylase besonders gut arbeiten. Sie beginnt damit, Stärke in kleinere Zuckerbausteine zu spalten.\n\nIm Magen ändern sich die Bedingungen deutlich. Durch die Magensäure ist der Magen stark sauer, der pH-Wert liegt ungefähr bei 2. Dieses saure Milieu ist für das Enzym Pepsin wichtig. Pepsin spaltet Proteine in kürzere Peptidketten und arbeitet gerade deshalb im Magen besonders gut.\n\nIm Dünndarm wird der saure Speisebrei wieder neutralisiert. Dort herrscht meist ein neutraler bis leicht alkalischer pH-Wert, ungefähr pH 8. In diesem Bereich wirken mehrere wichtige Verdauungsenzyme. Trypsin spaltet Proteine und Peptide weiter, Lipase spaltet Fette und Lactase spaltet den Milchzucker Lactose.",
+          "startButtonLabel": "Text schließen und Aufgabe starten",
+          "resetButtonLabel": "Aufgabe zurücksetzen",
+          "prompt": "Ordne aus dem Gedächtnis die pH-Bereiche und Enzyme den Abschnitten des Verdauungstrakts zu.",
+          "hideTextAfterStart": true,
+          "allowTextReopen": false,
+          "targets": [
+            {
+              "id": "mouth",
+              "label": "Mund",
+              "correctCards": [
+                "ph_neutral_7",
+                "enzyme_amylase"
+              ]
+            },
+            {
+              "id": "stomach",
+              "label": "Magen",
+              "correctCards": [
+                "ph_acidic_2",
+                "enzyme_pepsin"
+              ]
+            },
+            {
+              "id": "small_intestine",
+              "label": "Dünndarm",
+              "correctCards": [
+                "ph_slightly_alkaline_8",
+                "enzyme_trypsin",
+                "enzyme_lipase",
+                "enzyme_lactase"
+              ]
+            }
+          ],
+          "cards": [
+            {
+              "id": "ph_neutral_7",
+              "label": "ungefähr neutral, ~pH 7",
+              "cardType": "ph"
+            },
+            {
+              "id": "ph_acidic_2",
+              "label": "stark sauer, ~pH 2",
+              "cardType": "ph"
+            },
+            {
+              "id": "ph_slightly_alkaline_8",
+              "label": "neutral bis leicht alkalisch, ~pH 8",
+              "cardType": "ph"
+            },
+            {
+              "id": "enzyme_amylase",
+              "label": "Amylase",
+              "cardType": "enzyme"
+            },
+            {
+              "id": "enzyme_pepsin",
+              "label": "Pepsin",
+              "cardType": "enzyme"
+            },
+            {
+              "id": "enzyme_trypsin",
+              "label": "Trypsin",
+              "cardType": "enzyme"
+            },
+            {
+              "id": "enzyme_lipase",
+              "label": "Lipase",
+              "cardType": "enzyme"
+            },
+            {
+              "id": "enzyme_lactase",
+              "label": "Lactase",
+              "cardType": "enzyme"
+            }
+          ],
+          "feedbackCorrect": "Richtig! Du hast pH-Milieu und Enzyme den richtigen Verdauungsorten im Körper zugeordnet.",
+          "feedbackIncorrect": "Das stimmt noch nicht ganz. Überlege: Wo ist es durch Magensäure stark sauer? Wo beginnt die Stärkeverdauung? Und wo wird der saure Speisebrei wieder neutralisiert?",
+          "resetBehavior": {
+            "moveCardsToStart": true,
+            "clearFeedback": true,
+            "keepReadingTextHidden": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "ph_mismatch",
+      "title": "7. Wenn der pH-Wert nicht passt",
+      "learningGoal": "Ich kann erklären, warum ein Enzym außerhalb seines pH-Optimums weniger aktiv ist.",
+      "tasks": [
+        {
+          "id": "case_amylase_stomach_01",
+          "type": "multiple_choice",
+          "prompt": "Speichelamylase gelangt mit dem Speisebrei in den Magen. Was passiert dort wahrscheinlich mit ihrer Aktivität?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Sie nimmt stark ab, weil der Magen sehr sauer ist.",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Sie steigt stark an, weil im Magen viele Enzyme arbeiten.",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Sie bleibt gleich, weil Enzyme unabhängig vom pH-Wert arbeiten.",
+              "correct": false
+            }
+          ],
+          "feedbackCorrect": "Richtig. Amylase arbeitet nahe neutral, nicht im stark sauren Magen.",
+          "feedbackIncorrect": "Denke an das pH-Optimum: Amylase arbeitet nicht optimal bei pH 2."
+        },
+        {
+          "id": "case_trypsin_stomach_01",
+          "type": "short_answer",
+          "checkMode": "model_solution_only",
+          "answerInput": "free_text",
+          "prompt": "Trypsin arbeitet normalerweise im Dünndarm. Erkläre, warum es im Magen kaum aktiv wäre.",
+          "modelSolutionButtonLabel": "Musterlösung anzeigen",
+          "selfComparePrompt": "Vergleiche deine Antwort mit der Musterlösung. Hast du den Einsatzort, den pH-Wert im Magen und das pH-Optimum von Trypsin berücksichtigt?",
+          "modelSolution": "Trypsin arbeitet normalerweise im Dünndarm und hat sein pH-Optimum im leicht alkalischen Bereich, ungefähr bei pH 8. Der Magen ist dagegen stark sauer, ungefähr pH 2. Deshalb liegt der pH-Wert im Magen weit vom Optimum von Trypsin entfernt. Trypsin wäre dort kaum aktiv."
+        }
+      ]
+    },
+    {
+      "id": "hypochlorhydria_case",
+      "title": "8. Fallbeispiel: Hypochlorhydrie und Achlorhydrie",
+      "learningGoal": "Ich kann erklären, warum zu wenig Magensäure Verdauung und Gesundheit beeinträchtigen kann.",
+      "caseText": "Eine Person produziert dauerhaft zu wenig Magensäure. Der pH-Wert im Magen steigt dadurch deutlich an, zum Beispiel auf pH 5. Nach proteinreichen Mahlzeiten treten häufig Völlegefühl und Verdauungsbeschwerden auf.",
+      "tasks": [
+        {
+          "id": "hypo_step_01",
+          "type": "multiple_choice",
+          "prompt": "Welches Enzym ist im Magen besonders wichtig für die Eiweißverdauung?",
+          "options": [
+            {
+              "id": "a",
+              "text": "Pepsin",
+              "correct": true
+            },
+            {
+              "id": "b",
+              "text": "Trypsin",
+              "correct": false
+            },
+            {
+              "id": "c",
+              "text": "Lactase",
+              "correct": false
+            }
+          ],
+          "feedbackCorrect": "Richtig. Pepsin beginnt im Magen die Eiweißverdauung.",
+          "feedbackIncorrect": "Im Magen arbeitet vor allem Pepsin an der Eiweißverdauung."
+        },
+        {
+          "id": "hypo_step_02",
+          "type": "diagram_reading",
+          "checkMode": "model_solution_only",
+          "answerInput": "free_text",
+          "enzymeId": "pepsin",
+          "prompt": "Vergleiche pH 5 mit dem pH-Optimum von Pepsin. Ist Pepsin bei pH 5 stark aktiv?",
+          "modelSolutionButtonLabel": "Musterlösung anzeigen",
+          "selfComparePrompt": "Vergleiche deine Antwort mit der Musterlösung. Hast du pH 5 mit dem pH-Optimum von Pepsin verglichen?",
+          "modelSolution": "Pepsin ist bei pH 5 nicht stark aktiv. Sein pH-Optimum liegt ungefähr bei pH 2. pH 5 ist deutlich weniger sauer und liegt weit vom Optimum entfernt. Deshalb arbeitet Pepsin bei pH 5 nur noch sehr wenig oder kaum."
+        },
+        {
+          "id": "hypo_step_03",
+          "type": "order",
+          "prompt": "Ordne die Folgen von Hypochlorhydrie in die richtige Reihenfolge.",
+          "items": [
+            {
+              "text": "Es wird zu wenig Magensäure gebildet.",
+              "order": 1
+            },
+            {
+              "text": "Der pH-Wert im Magen steigt.",
+              "order": 2
+            },
+            {
+              "text": "Pepsinogen wird schlechter zu Pepsin aktiviert.",
+              "order": 3
+            },
+            {
+              "text": "Proteine werden im Magen schlechter vorverdaut.",
+              "order": 4
+            },
+            {
+              "text": "Es kann zu Verdauungsbeschwerden kommen.",
+              "order": 5
+            }
+          ],
+          "feedbackCorrect": "Richtig. So hängt der veränderte pH-Wert mit den Beschwerden zusammen.",
+          "feedbackIncorrect": "Beginne mit der Ursache: zu wenig Magensäure."
+        },
+        {
+          "id": "hypo_transfer_01",
+          "type": "short_answer",
+          "checkMode": "model_solution_only",
+          "answerInput": "free_text",
+          "prompt": "Erkläre, warum Hypochlorhydrie oder Achlorhydrie gefährlich sein können.",
+          "modelSolutionButtonLabel": "Musterlösung anzeigen",
+          "selfComparePrompt": "Vergleiche deine Antwort mit der Musterlösung. Prüfe besonders, ob du Pepsin, Proteinverdauung, Keime und mögliche Nährstoffprobleme genannt hast.",
+          "modelSolution": "Bei Hypochlorhydrie wird zu wenig Magensäure gebildet, bei Achlorhydrie gar keine. Dadurch steigt der pH-Wert im Magen. Pepsinogen wird schlechter zu Pepsin aktiviert und Pepsin arbeitet weniger effektiv. Proteine werden im Magen daher schlechter vorverdaut. Außerdem kann Magensäure viele Keime abtöten; diese Schutzwirkung ist dann vermindert. Auch bestimmte Nährstoffe können schlechter verfügbar werden. Mögliche Folgen sind Verdauungsbeschwerden, Völlegefühl, Nährstoffmängel und ein erhöhtes Risiko für Infektionen."
+        }
+      ]
+    },
+    {
+      "id": "final_check",
+      "title": "9. Abschlusscheck",
+      "learningGoal": "Ich kann das Thema pH-Abhängigkeit von Enzymen zusammenhängend erklären.",
+      "tasks": [
+        {
+          "id": "final_selfcheck_01",
+          "type": "self_check",
+          "prompt": "Hake ab, was du schon sicher kannst.",
+          "items": [
+            "Ich kann saure, neutrale und alkalische pH-Werte unterscheiden.",
+            "Ich kann erklären, was ein pH-Optimum ist.",
+            "Ich kann aus einem Diagramm das pH-Optimum ablesen.",
+            "Ich kann Pepsin, Amylase und Trypsin nach Substrat und pH-Optimum vergleichen.",
+            "Ich kann Pepsin, Amylase und Trypsin ihrem Einsatzort zuordnen.",
+            "Ich kann erklären, warum ein Enzym außerhalb seines pH-Optimums schlechter arbeitet.",
+            "Ich kann erklären, warum zu wenig Magensäure die Eiweißverdauung stören kann.",
+            "Ich kann mögliche Folgen von Hypochlorhydrie oder Achlorhydrie nennen."
+          ]
+        }
+      ]
+    }
+  ]
+}

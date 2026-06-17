@@ -2,8 +2,8 @@ window.SIMULATION_PARAMS = {
   simulation: {
     enzymeCount: 4,
     substrateCount: 10,
-    temperatureSteps: [0, 10, 20, 30, 40, 50],
-    optimumTemperature: 30,
+    temperatureSteps: [0, 10, 20, 30, 37, 40, 50],
+    optimumTemperature: 37,
     denaturationStartsAt: 40
   },
   temperatureSettings: {
@@ -32,6 +32,13 @@ window.SIMULATION_PARAMS = {
       activeEnzymesAtStart: 4,
       convertedSubstrates: 10,
       durationSeconds: 5,
+      relativeVelocity: 80,
+      denaturation: "none"
+    },
+    37: {
+      activeEnzymesAtStart: 4,
+      convertedSubstrates: 10,
+      durationSeconds: 4,
       relativeVelocity: 100,
       denaturation: "none"
     },
